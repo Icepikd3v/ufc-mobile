@@ -30,6 +30,13 @@ Manage UFC fighters — view, add, update, and delete fighter info — right fro
 
 ---
 
+## Notes
+
+- Fighter profile images are intentionally out of scope for this version.
+- Current focus is live auth, roster import/sync, and full fighter CRUD workflows.
+
+---
+
 ## 🛠 Technologies Used
 
 - React Native

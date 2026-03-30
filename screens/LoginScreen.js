@@ -9,7 +9,6 @@ import {
   ScrollView,
 } from "react-native";
 import { login } from "../AuthServices";
-import { DEMO_EMAIL, DEMO_PASSWORD } from "../constants/demoAuth";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -35,9 +34,6 @@ export default function LoginScreen({ navigation }) {
         <Text style={styles.description}>
           Fighter tracking and CRUD operations from one streamlined mobile dashboard.
         </Text>
-        <Text style={styles.modeNote}>
-          Demo mode is frontend-only and safe during API downtime.
-        </Text>
         {error && <Text style={styles.error}>{error}</Text>}
         <TextInput
           placeholder="Email"
@@ -55,9 +51,6 @@ export default function LoginScreen({ navigation }) {
           secureTextEntry
           style={styles.input}
         />
-        <Text style={styles.demoCreds}>
-          Demo login: {DEMO_EMAIL} / {DEMO_PASSWORD}
-        </Text>
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
@@ -97,11 +90,6 @@ const styles = StyleSheet.create({
     color: "#d7e4ff",
     marginBottom: 8,
   },
-  modeNote: {
-    fontSize: 13,
-    color: "#9acfae",
-    marginBottom: 16,
-  },
   input: {
     height: 46,
     borderColor: "#39528f",
@@ -111,11 +99,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     color: "#eef4ff",
     backgroundColor: "#111e41",
-  },
-  demoCreds: {
-    color: "#9fb8e7",
-    marginBottom: 14,
-    fontSize: 12,
   },
   button: {
     backgroundColor: "#2f89ff",

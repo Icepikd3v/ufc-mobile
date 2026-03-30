@@ -1,13 +1,28 @@
 import React, { useState, useCallback } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+  TextInput,
+} from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { getToken } from "../AuthServices";
-import { getFighters } from "../services/fightersService";
+import {
+  getFighters,
+  importFightersFromRoster,
+  getRosterSyncStatus,
+} from "../services/fightersService";
 
 export default function FightersListScreen({ navigation }) {
   const [fighters, setFighters] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [importing, setImporting] = useState(false);
+  const [rosterUrl, setRosterUrl] = useState("");
+  const [syncMeta, setSyncMeta] = useState("");
 
   const fetchFighterList = useCallback(async () => {
     setLoading(true);
@@ -20,13 +35,43 @@ export default function FightersListScreen({ navigation }) {
       }
       const rows = await getFighters(token);
       setFighters(rows);
+      try {
+        const status = await getRosterSyncStatus(token);
+        if (status?.autoSyncEnabled) {
+          setSyncMeta(`Auto sync every ${status.intervalMinutes} min`);
+        } else {
+          setSyncMeta("Auto sync disabled");
+        }
+      } catch {
+        setSyncMeta("");
+      }
     } catch (err) {
-      setError("Unable to load fighters right now. Demo mode remains available from the login screen.");
+      setError("Unable to load fighters right now.");
       console.error("Failed to fetch fighters:", err?.message || err);
     } finally {
       setLoading(false);
     }
   }, [navigation]);
+
+  const handleImportRoster = async () => {
+    setImporting(true);
+    setError("");
+    try {
+      const token = await getToken();
+      if (!token) {
+        navigation.navigate("Login");
+        return;
+      }
+
+      await importFightersFromRoster(token, rosterUrl.trim());
+      setSyncMeta("Roster synced.");
+      await fetchFighterList();
+    } catch (err) {
+      setError(err?.response?.data?.message || "Unable to import roster right now.");
+    } finally {
+      setImporting(false);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -38,13 +83,29 @@ export default function FightersListScreen({ navigation }) {
     <View style={styles.container}>
       <View style={styles.headerRow}>
         <Text style={styles.title}>Fighters</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => navigation.navigate("AddFighter")}
-        >
-          <Text style={styles.addButtonText}>+ Add Fighter</Text>
-        </TouchableOpacity>
+        <View style={styles.actionRow}>
+          <TouchableOpacity style={styles.importButton} onPress={handleImportRoster} disabled={importing}>
+            <Text style={styles.addButtonText}>{importing ? "Importing..." : "Import Roster"}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate("AddFighter")}
+          >
+            <Text style={styles.addButtonText}>+ Add Fighter</Text>
+          </TouchableOpacity>
+        </View>
       </View>
+      <Text style={styles.inputLabel}>Roster Source URL (optional override)</Text>
+      <TextInput
+        style={styles.urlInput}
+        placeholder="https://your-ufc-api/fighters"
+        placeholderTextColor="#7e90b7"
+        value={rosterUrl}
+        onChangeText={setRosterUrl}
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+      {syncMeta ? <Text style={styles.syncMeta}>{syncMeta}</Text> : null}
       {loading ? <ActivityIndicator color="#6aa9ff" size="large" /> : null}
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
@@ -86,6 +147,37 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 12,
+  },
+  actionRow: {
+    flexDirection: "row",
+  },
+  inputLabel: {
+    color: "#b9cbf0",
+    fontSize: 12,
+    marginBottom: 6,
+  },
+  urlInput: {
+    borderWidth: 1,
+    borderColor: "#3a4f87",
+    borderRadius: 10,
+    backgroundColor: "#111e41",
+    color: "#eef4ff",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
+    fontSize: 13,
+  },
+  syncMeta: {
+    color: "#9ce0b6",
+    marginBottom: 10,
+    fontSize: 12,
+  },
+  importButton: {
+    backgroundColor: "#214fa0",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginRight: 8,
   },
   title: {
     color: "#8fc1ff",

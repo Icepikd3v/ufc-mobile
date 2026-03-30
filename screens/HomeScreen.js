@@ -1,18 +1,15 @@
 // HomeScreen.js
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { getAuthEmail, getAuthMode, logout } from "../AuthServices";
+import { getAuthEmail, logout } from "../AuthServices";
 
 export default function HomeScreen({ navigation }) {
   const [user, setUser] = useState("");
-  const [mode, setMode] = useState("live");
 
   useEffect(() => {
     const fetchUser = async () => {
       const email = await getAuthEmail();
-      const authMode = await getAuthMode();
       setUser(email || "Authenticated User");
-      setMode(authMode);
     };
 
     fetchUser();
@@ -31,9 +28,7 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.card}>
         <Text style={styles.title}>Fight Ops Dashboard</Text>
         <Text style={styles.subtext}>Signed in as: {user}</Text>
-        <Text style={[styles.modeTag, mode === "demo" ? styles.modeDemo : styles.modeLive]}>
-          {mode === "demo" ? "Frontend Demo Mode" : "Live API Mode"}
-        </Text>
+        <Text style={[styles.modeTag, styles.modeLive]}>Live API Mode</Text>
         <Text style={styles.instruction}>
           Open the fighters dashboard to browse, add, edit, and remove records.
         </Text>
@@ -83,10 +78,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontSize: 12,
     fontWeight: "700",
-  },
-  modeDemo: {
-    backgroundColor: "#184527",
-    color: "#aef5c7",
   },
   modeLive: {
     backgroundColor: "#1d2f66",
