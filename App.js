@@ -31,14 +31,22 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={initialRoute}>
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Signup" component={SignupScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="FightersList" component={FightersListScreen} />
-        <Stack.Screen name="AddFighter" component={AddFighterScreen} />
-        <Stack.Screen name="UpdateFighter" component={UpdateFighterScreen} />
-        <Stack.Screen name="FighterDetail" component={FighterDetailScreen} />
+      <Stack.Navigator
+        initialRouteName={initialRoute}
+        screenOptions={{
+          headerStyle: { backgroundColor: "#0f1630" },
+          headerTintColor: "#eaf2ff",
+          headerTitleStyle: { fontWeight: "700" },
+          cardStyle: { backgroundColor: "#070b19" },
+        }}
+      >
+        <Stack.Screen name="Login" component={LoginScreen} options={{ title: "UFC Mobile Access" }} />
+        <Stack.Screen name="Signup" component={SignupScreen} options={{ title: "Create Account" }} />
+        <Stack.Screen name="Home" component={HomeScreen} options={{ title: "UFC Mobile Hub" }} />
+        <Stack.Screen name="FightersList" component={FightersListScreen} options={{ title: "Fighters Dashboard" }} />
+        <Stack.Screen name="AddFighter" component={AddFighterScreen} options={{ title: "Add Fighter" }} />
+        <Stack.Screen name="UpdateFighter" component={UpdateFighterScreen} options={{ title: "Update Fighter" }} />
+        <Stack.Screen name="FighterDetail" component={FighterDetailScreen} options={{ title: "Fighter Details" }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -1,6 +1,6 @@
 // SignupScreen.js
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { signup } from "../AuthServices";
 
 export default function SignupScreen({ navigation }) {
@@ -25,81 +25,111 @@ export default function SignupScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Signup</Text>
-      {error && <Text style={styles.error}>{error}</Text>}
-      <TextInput
-        placeholder="Email"
-        placeholderTextColor="#888"
-        value={email}
-        onChangeText={setEmail}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Password"
-        placeholderTextColor="#888"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="First Name"
-        placeholderTextColor="#888"
-        value={firstName}
-        onChangeText={setFirstName}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Last Name"
-        placeholderTextColor="#888"
-        value={lastName}
-        onChangeText={setLastName}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Age"
-        placeholderTextColor="#888"
-        value={age}
-        onChangeText={setAge}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Country"
-        placeholderTextColor="#888"
-        value={country}
-        onChangeText={setCountry}
-        style={styles.input}
-      />
-      <Button title="Signup" onPress={handleSignup} color="#1E88E5" />
-    </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.card}>
+        <Text style={styles.title}>Create Live Account</Text>
+        <Text style={styles.subtitle}>Use this path for live backend authentication.</Text>
+        {error && <Text style={styles.error}>{error}</Text>}
+        <TextInput
+          placeholder="Email"
+          placeholderTextColor="#7e90b7"
+          value={email}
+          onChangeText={setEmail}
+          style={styles.input}
+          autoCapitalize="none"
+        />
+        <TextInput
+          placeholder="Password"
+          placeholderTextColor="#7e90b7"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          style={styles.input}
+        />
+        <TextInput
+          placeholder="First Name"
+          placeholderTextColor="#7e90b7"
+          value={firstName}
+          onChangeText={setFirstName}
+          style={styles.input}
+        />
+        <TextInput
+          placeholder="Last Name"
+          placeholderTextColor="#7e90b7"
+          value={lastName}
+          onChangeText={setLastName}
+          style={styles.input}
+        />
+        <TextInput
+          placeholder="Age"
+          placeholderTextColor="#7e90b7"
+          value={age}
+          onChangeText={setAge}
+          style={styles.input}
+          keyboardType="numeric"
+        />
+        <TextInput
+          placeholder="Country"
+          placeholderTextColor="#7e90b7"
+          value={country}
+          onChangeText={setCountry}
+          style={styles.input}
+        />
+        <TouchableOpacity style={styles.button} onPress={handleSignup}>
+          <Text style={styles.buttonText}>Signup</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: "center",
+    flexGrow: 1,
     padding: 20,
-    backgroundColor: "#121212",
+    backgroundColor: "#070b19",
+  },
+  card: {
+    borderWidth: 1,
+    borderColor: "#2d3b63",
+    borderRadius: 14,
+    backgroundColor: "#101833",
+    padding: 18,
   },
   title: {
     fontSize: 24,
-    color: "#1E88E5",
-    marginBottom: 20,
-    textAlign: "center",
+    color: "#8fc1ff",
+    marginBottom: 6,
+    fontWeight: "700",
+  },
+  subtitle: {
+    color: "#c1d5ff",
+    marginBottom: 12,
   },
   input: {
-    height: 40,
-    borderColor: "#1E88E5",
+    height: 44,
+    borderColor: "#39528f",
     borderWidth: 1,
-    marginBottom: 20,
+    marginBottom: 12,
+    borderRadius: 10,
     paddingLeft: 10,
-    color: "#fff", // Text color
+    color: "#eef4ff",
+    backgroundColor: "#111e41",
+  },
+  button: {
+    marginTop: 4,
+    backgroundColor: "#2f89ff",
+    borderRadius: 10,
+    paddingVertical: 12,
+  },
+  buttonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "700",
+    fontSize: 16,
   },
   error: {
-    color: "red",
-    marginBottom: 20,
-    textAlign: "center",
+    color: "#ff9aa8",
+    marginBottom: 10,
   },
 });

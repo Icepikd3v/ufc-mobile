@@ -1,67 +1,76 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
-import axios from "axios";
+import React, { useState, useCallback } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import { getToken } from "../AuthServices";
+import { getFighterById, removeFighter } from "../services/fightersService";
 
 export default function FighterDetailScreen({ route, navigation }) {
   const [fighter, setFighter] = useState(route.params.fighter);
 
-  const fetchFighter = useCallback(() => {
-    axios
-      .get(
-        `https://ufc-api-demo-e18d3cbd0a55.herokuapp.com/api/v1/fighters/${fighter._id}`,
-      )
-      .then((response) => {
-        console.log("Fetched fighter data:", response.data);
-        setFighter(response.data);
-      })
-      .catch((error) => {
-        console.error("API request failed:", error);
-      });
-  }, [fighter._id]);
+  const refreshFighter = useCallback(async () => {
+    try {
+      const token = await getToken();
+      const next = await getFighterById(route.params.fighter._id, token);
+      if (next) setFighter(next);
+    } catch (err) {
+      console.error("Failed to refresh fighter:", err?.message || err);
+    }
+  }, [route.params.fighter._id]);
 
   useFocusEffect(
     useCallback(() => {
-      fetchFighter();
-    }, [fetchFighter]),
+      refreshFighter();
+    }, [refreshFighter]),
   );
 
-  const deleteFighter = () => {
-    axios
-      .delete(
-        `https://ufc-api-demo-e18d3cbd0a55.herokuapp.com/api/v1/fighters/${fighter._id}`,
-      )
-      .then((response) => {
-        console.log("Fighter deleted successfully:", response.data);
-        navigation.navigate("FightersList");
-      })
-      .catch((error) => {
-        console.error("API request failed:", error);
-      });
+  const handleDelete = async () => {
+    Alert.alert("Delete Fighter", "Are you sure you want to remove this fighter?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            const token = await getToken();
+            await removeFighter(fighter._id, token);
+            navigation.navigate("FightersList");
+          } catch (err) {
+            Alert.alert("Delete failed", "Unable to remove fighter right now.");
+          }
+        },
+      },
+    ]);
   };
 
   if (!fighter) {
-    return <Text>Loading...</Text>;
+    return (
+      <View style={styles.container}>
+        <Text style={styles.loadingText}>Loading fighter...</Text>
+      </View>
+    );
   }
 
-  console.log("Displaying fighter data:", fighter);
-  const { wins, losses } = fighter.record || { wins: 0, losses: 0 };
+  const wins = fighter.record?.wins ?? 0;
+  const losses = fighter.record?.losses ?? 0;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Name: {fighter.name}</Text>
-      <Text style={styles.label}>Age: {fighter.age}</Text>
-      <Text style={styles.label}>
-        Record: Wins - {wins}, Losses - {losses}
-      </Text>
-      <Text style={styles.label}>Region: {fighter.region}</Text>
-      <Text style={styles.label}>League: {fighter.league}</Text>
-      <Button
-        title="Edit Fighter"
+      <View style={styles.card}>
+        <Text style={styles.name}>{fighter.name}</Text>
+        <Text style={styles.line}>Age: {fighter.age}</Text>
+        <Text style={styles.line}>Region: {fighter.region}</Text>
+        <Text style={styles.line}>League: {fighter.league}</Text>
+        <Text style={styles.record}>Record: {wins}-{losses}</Text>
+      </View>
+      <TouchableOpacity
+        style={styles.primaryButton}
         onPress={() => navigation.navigate("UpdateFighter", { fighter })}
-        color="#1E88E5"
-      />
-      <Button title="Delete Fighter" onPress={deleteFighter} color="#1E88E5" />
+      >
+        <Text style={styles.primaryText}>Edit Fighter</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.secondaryButton} onPress={handleDelete}>
+        <Text style={styles.secondaryText}>Delete Fighter</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -69,12 +78,60 @@ export default function FighterDetailScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#121212",
+    backgroundColor: "#070b19",
+    padding: 16,
   },
-  label: {
-    fontSize: 18,
-    color: "#E0E0E0",
+  card: {
+    borderWidth: 1,
+    borderColor: "#2d3b63",
+    borderRadius: 12,
+    backgroundColor: "#101833",
+    padding: 14,
+    marginBottom: 16,
+  },
+  name: {
+    color: "#e9f1ff",
+    fontSize: 24,
+    fontWeight: "700",
     marginBottom: 10,
+  },
+  line: {
+    color: "#cad8f5",
+    fontSize: 16,
+    marginBottom: 6,
+  },
+  record: {
+    color: "#9ce0b6",
+    marginTop: 6,
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  primaryButton: {
+    backgroundColor: "#2f89ff",
+    borderRadius: 10,
+    paddingVertical: 12,
+    marginBottom: 10,
+  },
+  primaryText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "700",
+  },
+  secondaryButton: {
+    borderWidth: 1,
+    borderColor: "#6b3850",
+    backgroundColor: "#2a1721",
+    borderRadius: 10,
+    paddingVertical: 12,
+  },
+  secondaryText: {
+    color: "#ffcad5",
+    textAlign: "center",
+    fontWeight: "700",
+  },
+  loadingText: {
+    color: "#c7d8fc",
+    textAlign: "center",
+    marginTop: 28,
   },
 });

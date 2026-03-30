@@ -1,104 +1,118 @@
 import React, { useState } from "react";
-import { View, TextInput, Button, StyleSheet } from "react-native";
-import axios from "axios";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from "react-native";
+import { getToken } from "../AuthServices";
+import { updateFighter } from "../services/fightersService";
 
 export default function UpdateFighterScreen({ route, navigation }) {
   const { fighter } = route.params;
-  const [name, setName] = useState(fighter.name);
-  const [age, setAge] = useState(fighter.age.toString());
-  const [wins, setWins] = useState(fighter.record.wins.toString());
-  const [losses, setLosses] = useState(fighter.record.losses.toString());
-  const [region, setRegion] = useState(fighter.region);
-  const [league, setLeague] = useState(fighter.league);
+  const [name, setName] = useState(fighter.name || "");
+  const [age, setAge] = useState(String(fighter.age || ""));
+  const [wins, setWins] = useState(String(fighter.record?.wins ?? 0));
+  const [losses, setLosses] = useState(String(fighter.record?.losses ?? 0));
+  const [region, setRegion] = useState(fighter.region || "");
+  const [league, setLeague] = useState(fighter.league || "");
 
-  const updateFighter = () => {
-    const updatedFighter = {
-      name,
-      age: parseInt(age) || 0,
-      record: { wins: parseInt(wins) || 0, losses: parseInt(losses) || 0 },
-      region,
-      league,
-    };
-    console.log("Updating fighter with data:", updatedFighter);
-    axios
-      .patch(
-        `https://ufc-api-demo-e18d3cbd0a55.herokuapp.com/api/v1/fighters/${fighter._id}`,
-        updatedFighter,
-      )
-      .then((response) => {
-        console.log("Fighter updated successfully:", response.data);
-        navigation.navigate("FighterDetail", { fighter: response.data });
-      })
-      .catch((error) => {
-        console.error("API request failed:", error);
-      });
+  const handleUpdate = async () => {
+    if (!name || !age || !wins || !losses || !region || !league) {
+      Alert.alert("Missing details", "All fighter fields are required.");
+      return;
+    }
+
+    try {
+      const token = await getToken();
+      const updated = await updateFighter(
+        fighter._id,
+        {
+          name,
+          age: parseInt(age, 10) || 0,
+          region,
+          league,
+          record: { wins: parseInt(wins, 10) || 0, losses: parseInt(losses, 10) || 0 },
+        },
+        token,
+      );
+      navigation.navigate("FighterDetail", { fighter: updated || fighter });
+    } catch (err) {
+      Alert.alert("Update failed", "Unable to update fighter right now.");
+    }
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.card}>
+        <Text style={styles.title}>Update Fighter</Text>
+        <Input label="Name" value={name} setValue={setName} />
+        <Input label="Age" value={age} setValue={setAge} numeric />
+        <Input label="Wins" value={wins} setValue={setWins} numeric />
+        <Input label="Losses" value={losses} setValue={setLosses} numeric />
+        <Input label="Region" value={region} setValue={setRegion} />
+        <Input label="League" value={league} setValue={setLeague} />
+        <TouchableOpacity style={styles.button} onPress={handleUpdate}>
+          <Text style={styles.buttonText}>Save Updates</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+}
+
+function Input({ label, value, setValue, numeric = false }) {
+  return (
+    <>
+      <Text style={styles.label}>{label}</Text>
       <TextInput
         style={styles.input}
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-        placeholderTextColor="#E0E0E0"
+        value={value}
+        onChangeText={(txt) => setValue(numeric ? txt.replace(/[^0-9]/g, "") : txt)}
+        placeholder={label}
+        placeholderTextColor="#7e90b7"
+        keyboardType={numeric ? "numeric" : "default"}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Age"
-        value={age}
-        keyboardType="numeric"
-        onChangeText={(text) => setAge(text.replace(/[^0-9]/g, ""))}
-        placeholderTextColor="#E0E0E0"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Wins"
-        value={wins}
-        keyboardType="numeric"
-        onChangeText={(text) => setWins(text.replace(/[^0-9]/g, ""))}
-        placeholderTextColor="#E0E0E0"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Losses"
-        value={losses}
-        keyboardType="numeric"
-        onChangeText={(text) => setLosses(text.replace(/[^0-9]/g, ""))}
-        placeholderTextColor="#E0E0E0"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Region"
-        value={region}
-        onChangeText={setRegion}
-        placeholderTextColor="#E0E0E0"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="League"
-        value={league}
-        onChangeText={setLeague}
-        placeholderTextColor="#E0E0E0"
-      />
-      <Button title="Update Fighter" onPress={updateFighter} color="#1E88E5" />
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#121212",
+    flexGrow: 1,
+    backgroundColor: "#070b19",
+    padding: 16,
+  },
+  card: {
+    borderWidth: 1,
+    borderColor: "#2d3b63",
+    borderRadius: 12,
+    backgroundColor: "#101833",
+    padding: 14,
+  },
+  title: {
+    color: "#8fc1ff",
+    fontSize: 22,
+    fontWeight: "700",
+    marginBottom: 12,
+  },
+  label: {
+    color: "#cad8f5",
+    marginBottom: 6,
+    marginTop: 4,
   },
   input: {
-    height: 40,
-    borderColor: "gray",
     borderWidth: 1,
-    marginBottom: 10,
-    paddingLeft: 10,
-    color: "#E0E0E0",
-    borderColor: "#E0E0E0",
+    borderColor: "#3a4f87",
+    borderRadius: 10,
+    backgroundColor: "#111e41",
+    color: "#eef4ff",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  button: {
+    marginTop: 14,
+    backgroundColor: "#2f89ff",
+    borderRadius: 10,
+    paddingVertical: 12,
+  },
+  buttonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "700",
   },
 });

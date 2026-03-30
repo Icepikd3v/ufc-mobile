@@ -6,8 +6,10 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import { login } from "../AuthServices";
+import { DEMO_EMAIL, DEMO_PASSWORD } from "../constants/demoAuth";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -27,40 +29,46 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome to UFC Fighters Management</Text>
-      <Text style={styles.description}>
-        Manage and monitor UFC fighters with ease. Please log in to continue.
-      </Text>
-      <Text style={styles.instruction}>
-        Enter your credentials below to access the Fighters Dashboard.
-      </Text>
-      {error && <Text style={styles.error}>{error}</Text>}
-      <TextInput
-        placeholder="Email"
-        placeholderTextColor="#888"
-        value={email}
-        onChangeText={setEmail}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Password"
-        placeholderTextColor="#888"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        style={styles.input}
-      />
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.signupButton}
-        onPress={() => navigation.navigate("Signup")}
-      >
-        <Text style={styles.signupButtonText}>Signup</Text>
-      </TouchableOpacity>
-    </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.card}>
+        <Text style={styles.title}>UFC Mobile Companion</Text>
+        <Text style={styles.description}>
+          Fighter tracking and CRUD operations from one streamlined mobile dashboard.
+        </Text>
+        <Text style={styles.modeNote}>
+          Demo mode is frontend-only and safe during API downtime.
+        </Text>
+        {error && <Text style={styles.error}>{error}</Text>}
+        <TextInput
+          placeholder="Email"
+          placeholderTextColor="#7f8fb2"
+          value={email}
+          onChangeText={setEmail}
+          style={styles.input}
+          autoCapitalize="none"
+        />
+        <TextInput
+          placeholder="Password"
+          placeholderTextColor="#7f8fb2"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          style={styles.input}
+        />
+        <Text style={styles.demoCreds}>
+          Demo login: {DEMO_EMAIL} / {DEMO_PASSWORD}
+        </Text>
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.signupButton}
+          onPress={() => navigation.navigate("Signup")}
+        >
+          <Text style={styles.signupButtonText}>Create Live Account</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 }
 
@@ -69,40 +77,51 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     padding: 20,
-    backgroundColor: "#121212",
+    backgroundColor: "#070b19",
+  },
+  card: {
+    borderWidth: 1,
+    borderColor: "#2d3b63",
+    borderRadius: 14,
+    backgroundColor: "#101833",
+    padding: 18,
   },
   title: {
-    fontSize: 24,
-    color: "#1E88E5",
-    marginBottom: 10,
-    textAlign: "center",
+    fontSize: 26,
+    color: "#8fc1ff",
+    marginBottom: 8,
     fontWeight: "bold",
   },
   description: {
-    fontSize: 16,
-    color: "#E0E0E0",
-    marginBottom: 20,
-    textAlign: "center",
+    fontSize: 15,
+    color: "#d7e4ff",
+    marginBottom: 8,
   },
-  instruction: {
-    fontSize: 14,
-    color: "#E0E0E0",
-    marginBottom: 20,
-    textAlign: "center",
+  modeNote: {
+    fontSize: 13,
+    color: "#9acfae",
+    marginBottom: 16,
   },
   input: {
-    height: 40,
-    borderColor: "#1E88E5",
+    height: 46,
+    borderColor: "#39528f",
     borderWidth: 1,
-    marginBottom: 20,
-    paddingLeft: 10,
-    color: "#fff", // Text color
+    marginBottom: 12,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    color: "#eef4ff",
+    backgroundColor: "#111e41",
+  },
+  demoCreds: {
+    color: "#9fb8e7",
+    marginBottom: 14,
+    fontSize: 12,
   },
   button: {
-    backgroundColor: "#1E88E5",
-    paddingVertical: 10,
+    backgroundColor: "#2f89ff",
+    paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 10,
     alignItems: "center",
     marginBottom: 10,
   },
@@ -116,13 +135,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   signupButtonText: {
-    color: "#1E88E5",
-    fontSize: 16,
-    fontWeight: "bold",
+    color: "#93bfff",
+    fontSize: 14,
+    fontWeight: "700",
   },
   error: {
-    color: "red",
-    marginBottom: 20,
-    textAlign: "center",
+    color: "#ff9aa8",
+    marginBottom: 12,
   },
 });
